@@ -8,26 +8,31 @@ Then(/^Left Unit picker value should be "([^"]*)"$/) do |value|
 end
 
 
-
 Then(/^Show All button should be (enabled|disabled)$/) do |state|
+  button_state = find_element(id: 'btn_show_all').enabled?
   if state == "enabled"
-    puts("button is enabled")
+    fail('Expected to be enabled') if button_state != true
   elsif state == "disabled"
-    puts("button is disabled")
+  fail('Expected to be disabled') if button_state != false
   end
 end
-
 When(/^I press Clear button$/) do
   puts("clear button is pressed")
 end
 
 
-When(/^I type "([^"]*)" to target text field$/) do |target|
-  puts("target is #{target}")
+When(/^I type "([^"]*)" on application keyboard$/) do |target|
+  digits = target.split("")
+  digits.each do |digit|
+    find_element(id: "keypad").find_element(xpath: "//android.widget.Button[@text='#{digit}']").click
+  end
 end
 
 Then(/^I should see result as "([^"]*)"$/) do |result|
-  puts("result is #{result}")
+  value = find_element(id: "target_value").text
+  if value != result
+    fail("expected value is #{result}, actual value is #{value}")
+  end
 end
 
 Then(/^I press Add to Favorites icon$/) do
@@ -39,7 +44,11 @@ Then(/^I press on Favorite conversions$/) do
 end
 
 And(/^I verify "([^"]*)" added to Favorite conversions list$/) do |unit_type|
-  text(unit_type)
+  item_text = find_element(id: 'favorites_item_hint').text
+  if unit_type != item_text
+    fail("Can't find #{unit_type} in Favorite list")
+  end
+
 end
 
 Then(/^I press on search icon$/) do
@@ -55,6 +64,7 @@ Then(/^I press return button on soft keyboard$/) do
 end
 
 Then(/^I see "([^"]*)" as a current unit converter$/) do |current_unit|
+  binding.pry
   find_element(id: "action_bar").find_element(xpath: "//android.widget.TextView[@text='#{current_unit}']")
 end
 
@@ -67,3 +77,42 @@ And(/^Right Unit picker value should be "([^"]*)"$/) do |value|
   end
 end
 
+
+Then(/^I select "([^"]*)" from the left unit picker$/) do |value|
+  find_elements(id: "select_unit_spinner")[0].click
+  find_in_list(value)
+end
+
+Then(/^I select "([^"]*)" from menu$/) do |value|
+  text(value).click
+end
+
+Then(/^I select "([^"]*)" from the right unit picker$/) do |value|
+  find_elements(id: "select_unit_spinner")[1].click
+  find_in_list(value)
+end
+
+When(/^I press on unit switch button$/) do
+  find_element(id: "img_switch").click
+end
+
+
+Then(/^I should see text "([^"]*)"$/) do |value|
+  text(value)
+end
+
+And(/^I verify that (\d+)(?:st|nd|rd|th)? result in history is "([^"]*)"$/) do |index, text|
+  parent_element = find_element(id: "history_conversion_list")
+  array_of_elements = parent_element.find_elements(id: "history_single_line")
+  actual_text = array_of_elements[index.to_i - 1].find_element(id: "history_item_hint").text
+  if actual_text != text
+    fail("Expected text is #{text}, actual text is #{actual_text}")
+  end
+end
+
+When(/^I press delete from history at (\d+)(?:st|nd|rd|th)? row$/) do |index|
+  parent_element = find_element(id: "history_conversion_list")
+  array_of_elements = parent_element.find_elements(id: "history_single_line")
+  array_of_elements[index.to_i - 1].find_element(id: "deleteIcon").click
+
+end

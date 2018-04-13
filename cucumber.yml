@@ -1,0 +1,13 @@
+main: --tag @main_menu --format html --out report.html --format pretty
+
+custom: --tag @custom_conversions --format html --out report.html --format pretty
+
+home: --tag @home_screen --format html --out report.html --format pretty
+
+any: --tag @custom_conversions,@home_screen --format html --out report.html --format pretty
+
+strict: --tag @custom_conversions -t @home_screen --format html --out report.html --format pretty
+
+wip: -t @wip --format html --out report.html --format pretty
+
+gestures: -t @gestures --format html --out report.html --format pretty
